@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito · DomiApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #1a1a2e; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    nav {
+      background: #1a56db;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { color: #fff; font-weight: 700; font-size: 20px; }
+    .nav-link { color: #c7d7ff; font-size: 14px; padding: 6px 14px; border-radius: 8px; }
+    .nav-link:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+    .page { max-width: 640px; margin: 0 auto; padding: 28px 16px; }
+    .page-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e0e7ff;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .card-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #1a1a2e; }
+
+    /* ITEMS */
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f4ff;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-emoji { font-size: 26px; flex-shrink: 0; }
+    .item-info { flex: 1; }
+    .item-name { font-size: 14px; font-weight: 500; }
+    .item-sub  { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .item-price { font-size: 14px; font-weight: 700; color: #1a56db; flex-shrink: 0; }
+    .qty-row { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .qty-btn {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid #c7d7ff;
+      background: #fff;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: #1a56db;
+    }
+    .qty-btn:hover { background: #1a56db; color: #fff; border-color: #1a56db; }
+    .qty-num { font-weight: 700; font-size: 14px; min-width: 20px; text-align: center; }
+    .btn-eliminar {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 18px;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+
+    /* RESUMEN */
+    .resumen-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 6px 0;
+      color: #374151;
+    }
+    .resumen-row.total {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a2e;
+      border-top: 1px solid #e0e7ff;
+      margin-top: 8px;
+      padding-top: 12px;
+    }
+    .resumen-row.total span:last-child { color: #1a56db; }
+
+    /* DIRECCIÓN */
+    .dir-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e0e7ff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      margin-bottom: 8px;
+      transition: border-color .2s;
+    }
+    .dir-input:focus { border-color: #1a56db; }
+
+    /* MÉTODO DE PAGO */
+    .pay-opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e0e7ff;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .pay-opt:hover { border-color: #1a56db; background: #f0f4ff; }
+    .pay-opt.selected { border-color: #1a56db; background: #eff6ff; }
+    .pay-opt input { accent-color: #1a56db; width: 16px; height: 16px; }
+    .pay-opt label { font-size: 14px; font-weight: 500; cursor: pointer; flex: 1; }
+
+    /* BOTÓN CONFIRMAR */
+    .btn-confirmar {
+      width: 100%;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 4px;
+      transition: background .2s;
+    }
+    .btn-confirmar:hover { background: #1e40af; }
+    .btn-confirmar:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    /* CARRITO VACÍO */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #9ca3af;
+    }
+    .empty .emoji { font-size: 56px; margin-bottom: 16px; }
+    .empty p { font-size: 16px; margin-bottom: 20px; }
+    .btn-volver {
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 28px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">🛵 DomiApp</a>
+  <a href="index.html" class="nav-link">← Seguir comprando</a>
+</nav>
+
+<div class="page">
+  <div class="page-title">Tu carrito</div>
+  <div id="contenido"></div>
+</div>
+
+<script>
+  const API = 'https://domiapp-backend.onrender.com';
+  const DOMICILIO = 2500;
+  let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+  let metodoPago = 'efectivo';
+
+  function calcTotales() {
+    const subtotal = carrito.reduce((a, i) => a + i.precio * i.cantidad, 0);
+    return { subtotal, domicilio: DOMICILIO, total: subtotal + DOMICILIO };
+  }
+
+  function cambiarCantidad(id, tiendaId, delta) {
+    const item = carrito.find(i => i.id === id && i.tiendaId === tiendaId);
+    if (!item) return;
+    item.cantidad = Math.max(0, item.cantidad + delta);
+    if (item.cantidad === 0) carrito = carrito.filter(i => !(i.id === id && i.tiendaId === tiendaId));
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+    render();
+  }
+
+  function eliminar(id, tiendaId) {
+    carrito = carrito.filter(i => !(i.id === id && i.tiendaId === tiendaId));
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+    render();
+  }
+
+  function seleccionarPago(metodo, el) {
+    metodoPago = metodo;
+    document.querySelectorAll('.pay-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  async function confirmarPedido() {
+    const direccion = document.getElementById('direccion').value.trim();
+    if (!direccion) { alert('Por favor ingresa tu dirección de entrega.'); return; }
+    if (carrito.length === 0) return;
+
+    const btn = document.getElementById('btn-confirmar');
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+
+    const { total } = calcTotales();
+
+    try {
+      const res = await fetch(`${API}/api/pedidos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ items: carrito, direccion, metodoPago, total })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.removeItem('carrito');
+        window.location.href = `rastreo.html?id=${data.pedidoId}`;
+      } else {
+        // Sin backend aún: simular pedido
+        localStorage.removeItem('carrito');
+        window.location.href = `rastreo.html?id=1043`;
+      }
+    } catch {
+      // Sin backend: simular
+      localStorage.removeItem('carrito');
+      window.location.href = `rastreo.html?id=1043`;
+    }
+  }
+
+  function render() {
+    const contenido = document.getElementById('contenido');
+
+    if (carrito.length === 0) {
+      contenido.innerHTML = `
+        <div class="empty">
+          <div class="emoji">🛍</div>
+          <p>Tu carrito está vacío</p>
+          <button class="btn-volver" onclick="window.location.href='index.html'">Ver tiendas</button>
+        </div>`;
+      return;
+    }
+
+    const { subtotal, domicilio, total } = calcTotales();
+    const totalItems = carrito.reduce((a, i) => a + i.cantidad, 0);
+
+    contenido.innerHTML = `
+      <div class="card">
+        <div class="card-title">🛍 ${totalItems} producto${totalItems !== 1 ? 's' :''}  en tu pedido</div>
+        ${carrito.map(item => `
+          <div class="item-row">
+            <div class="item-emoji">${item.emoji}</div>
+            <div class="item-info">
+              <div class="item-name">${item.nombre}</div>
+              <div class="item-sub">$${item.precio.toLocaleString()} c/u</div>
+            </div>
+            <div class="qty-row">
+              <button class="qty-btn" onclick="cambiarCantidad(${item.id}, ${item.tiendaId}, -1)">−</button>
+              <span class="qty-num">${item.cantidad}</span>
+              <button class="qty-btn" onclick="cambiarCantidad(${item.id}, ${item.tiendaId}, 1)">+</button>
+            </div>
+            <div class="item-price">$${(item.precio * item.cantidad).toLocaleString()}</div>
+            <button class="btn-eliminar" onclick="eliminar(${item.id}, ${item.tiendaId})" title="Eliminar">✕</button>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="card">
+        <div class="card-title">📍 Dirección de entrega</div>
+        <input class="dir-input" id="direccion" type="text" placeholder="Ej: Cra 5 #12-34, Apto 201" />
+        <input class="dir-input" id="referencia" type="text" placeholder="Referencia (opcional): portería azul..." />
+      </div>
+
+      <div class="card">
+        <div class="card-title">💳 Método de pago</div>
+        <div class="pay-opt selected" onclick="seleccionarPago('efectivo', this)">
+          <input type="radio" name="pago" id="p-efectivo" checked />
+          <label for="p-efectivo">💵 Efectivo contra entrega</label>
+        </div>
+        <div class="pay-opt" onclick="seleccionarPago('tarjeta', this)">
+          <input type="radio" name="pago" id="p-tarjeta" />
+          <label for="p-tarjeta">💳 Tarjeta (próximamente)</label>
+        </div>
+        <div class="pay-opt" onclick="seleccionarPago('nequi', this)">
+          <input type="radio" name="pago" id="p-nequi" />
+          <label for="p-nequi">📱 Nequi / Daviplata (próximamente)</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🧾 Resumen</div>
+        <div class="resumen-row"><span>Subtotal</span><span>$${subtotal.toLocaleString()}</span></div>
+        <div class="resumen-row"><span>Domicilio</span><span>$${domicilio.toLocaleString()}</span></div>
+        <div class="resumen-row total"><span>Total a pagar</span><span>$${total.toLocaleString()}</span></div>
+        <button class="btn-confirmar" id="btn-confirmar" onclick="confirmarPedido()">
+          Confirmar pedido →
+        </button>
+      </div>
+    `;
+  }
+
+  render();
+</script>
+
+</body>
+</html>
