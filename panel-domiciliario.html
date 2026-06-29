@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Domiciliario · DomiApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #1a1a2e; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    nav {
+      background: #1a56db;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo  { color: #fff; font-weight: 700; font-size: 18px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-name  { color: #c7d7ff; font-size: 14px; }
+    .btn-logout { background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; }
+
+    /* DISPONIBILIDAD */
+    .disp-bar {
+      background: #fff;
+      border-bottom: 1px solid #e0e7ff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .disp-info { font-size: 14px; }
+    .disp-info span { font-weight: 600; }
+    .disp-info span.on  { color: #10b981; }
+    .disp-info span.off { color: #9ca3af; }
+    .toggle-track {
+      width: 48px; height: 26px;
+      border-radius: 13px;
+      background: #d1d5db;
+      position: relative;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-track.on { background: #10b981; }
+    .toggle-knob {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle-track.on .toggle-knob { transform: translateX(22px); }
+
+    /* TABS */
+    .tabs-bar {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #e0e7ff;
+      padding: 0 24px;
+    }
+    .tab {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+      border: none;
+      background: transparent;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+    }
+    .tab.active { color: #1a56db; border-bottom-color: #1a56db; }
+
+    .page { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* PEDIDO NUEVO - ALERTA */
+    .alerta-pedido {
+      background: #fff;
+      border-radius: 14px;
+      border: 2px solid #f59e0b;
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .alerta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .alerta-title  { font-size: 16px; font-weight: 700; }
+    .alerta-badge  { background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+    .alerta-ruta   { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .ruta-paso { display: flex; align-items: flex-start; gap: 12px; }
+    .ruta-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .ruta-icon.tienda  { background: #dbeafe; }
+    .ruta-icon.cliente { background: #d1fae5; }
+    .ruta-text { flex: 1; }
+    .ruta-label { font-size: 12px; color: #6b7280; }
+    .ruta-dir   { font-size: 14px; font-weight: 500; }
+    .ruta-dist  { font-size: 12px; color: #1a56db; }
+    .ruta-linea { width: 2px; height: 16px; background: #e0e7ff; margin-left: 15px; }
+    .ganancia-row { display: flex; justify-content: space-between; align-items: center; background: #f0f4ff; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
+    .ganancia-lbl { font-size: 13px; color: #6b7280; }
+    .ganancia-val { font-size: 18px; font-weight: 700; color: #1a56db; }
+    .alerta-btns { display: flex; gap: 10px; }
+    .btn-rechazar { flex: 1; padding: 11px; border: 1px solid #fca5a5; border-radius: 10px; background: #fff; color: #ef4444; font-size: 14px; font-weight: 500; }
+    .btn-aceptar  { flex: 2; padding: 11px; border: none; border-radius: 10px; background: #1a56db; color: #fff; font-size: 15px; font-weight: 700; }
+
+    /* PEDIDO EN CURSO */
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e0e7ff;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .card-title { font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; }
+    .paso-actual { text-align: center; padding: 20px; }
+    .paso-icon  { font-size: 52px; margin-bottom: 10px; }
+    .paso-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .paso-sub   { font-size: 14px; color: #6b7280; }
+    .btn-paso   { width: 100%; padding: 13px; border: none; border-radius: 11px; font-size: 15px; font-weight: 700; margin-top: 16px; color: #fff; }
+    .btn-paso.recoger   { background: #f59e0b; }
+    .btn-paso.entregar  { background: #10b981; }
+
+    .detalle-item { display: flex; justify-content: space-between; font-size: 14px; padding: 7px 0; border-bottom: 1px solid #f0f4ff; color: #374151; }
+    .detalle-item:last-child { border-bottom: none; }
+    .detalle-total { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; margin-top: 10px; }
+    .detalle-total span:last-child { color: #1a56db; }
+
+    .pago-badge { display: inline-flex; align-items: center; gap: 6px; background: #fef3c7; color: #92400e; font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 20px; }
+
+    .cliente-row { display: flex; align-items: center; gap: 12px; }
+    .cliente-avatar { width: 42px; height: 42px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .cliente-name { font-size: 15px; font-weight: 600; }
+    .cliente-dir  { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .cliente-btns { margin-left: auto; display: flex; gap: 8px; }
+    .btn-mini { background: #f0f4ff; border: 1px solid #e0e7ff; border-radius: 8px; padding: 7px 12px; font-size: 13px; color: #1a56db; }
+
+    /* GANANCIAS */
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #fff; border-radius: 12px; border: 1px solid #e0e7ff; padding: 16px; }
+    .stat-val  { font-size: 24px; font-weight: 700; color: #1a56db; }
+    .stat-lbl  { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+    .hist-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f4ff; }
+    .hist-icon { width: 36px; height: 36px; border-radius: 50%; background: #d1fae5; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .hist-info { flex: 1; }
+    .hist-ruta { font-size: 14px; font-weight: 500; }
+    .hist-hora { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+    .hist-val  { font-size: 14px; font-weight: 700; color: #10b981; }
+
+    /* ENTREGADO */
+    .entregado-card { background: #d1fae5; border: 1px solid #6ee7b7; border-radius: 14px; padding: 28px; text-align: center; margin-bottom: 14px; }
+    .entregado-icon  { font-size: 52px; margin-bottom: 10px; }
+    .entregado-title { font-size: 20px; font-weight: 700; color: #065f46; margin-bottom: 6px; }
+    .entregado-sub   { font-size: 14px; color: #047857; margin-bottom: 16px; }
+    .entregado-ganancia { font-size: 28px; font-weight: 700; color: #065f46; }
+    .btn-siguiente { display: block; width: 100%; background: #1a56db; color: #fff; border: none; border-radius: 11px; padding: 13px; font-size: 15px; font-weight: 700; margin-top: 14px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">🏍 Panel Domiciliario</div>
+  <div class="nav-right">
+    <span class="nav-name" id="nav-nombre">Domiciliario</span>
+    <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+  </div>
+</nav>
+
+<div class="disp-bar">
+  <div class="disp-info">
+    Estado: <span id="disp-label" class="on">● Disponible</span>
+  </div>
+  <div class="toggle-track on" id="disp-toggle" onclick="toggleDisp()">
+    <div class="toggle-knob"></div>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab active" onclick="mostrarTab('activo', this)">Pedido activo</button>
+  <button class="tab" onclick="mostrarTab('ganancias', this)">Mis ganancias</button>
+</div>
+
+<div class="page">
+
+  <!-- TAB ACTIVO -->
+  <div class="section active" id="tab-activo">
+    <div id="contenido-activo"></div>
+  </div>
+
+  <!-- TAB GANANCIAS -->
+  <div class="section" id="tab-ganancias">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="gan-hoy">$42.000</div><div class="stat-lbl">Ganado hoy</div></div>
+      <div class="stat-card"><div class="stat-val" id="gan-pedidos">12</div><div class="stat-lbl">Pedidos hoy</div></div>
+      <div class="stat-card"><div class="stat-val">$3.500</div><div class="stat-lbl">Promedio / pedido</div></div>
+      <div class="stat-card"><div class="stat-val">⭐ 4.9</div><div class="stat-lbl">Calificación</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Últimas entregas</div>
+      <div class="hist-row"><div class="hist-icon">✅</div><div class="hist-info"><div class="hist-ruta">Tienda El Punto → Carlos M.</div><div class="hist-hora">Hace 20 min</div></div><div class="hist-val">+$3.500</div></div>
+      <div class="hist-row"><div class="hist-icon">✅</div><div class="hist-info"><div class="hist-ruta">La Fogata → Laura P.</div><div class="hist-hora">Hace 1 hora</div></div><div class="hist-val">+$4.000</div></div>
+      <div class="hist-row"><div class="hist-icon">✅</div><div class="hist-info"><div class="hist-ruta">Droguería Central → Juan R.</div><div class="hist-hora">Hace 2 horas</div></div><div class="hist-val">+$3.500</div></div>
+      <div class="hist-row" style="border-bottom:none;"><div class="hist-icon">✅</div><div class="hist-info"><div class="hist-ruta">Tienda El Punto → Ana G.</div><div class="hist-hora">Hace 3 horas</div></div><div class="hist-val">+$3.000</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API = 'https://domiapp-backend.onrender.com';
+  const nombre = localStorage.getItem('nombre') || 'Domiciliario';
+  document.getElementById('nav-nombre').textContent = nombre;
+
+  if (!localStorage.getItem('token')) window.location.href = 'login.html';
+
+  let disponible = true;
+  let gananciaHoy = 42000;
+  let pedidosHoy  = 12;
+
+  // Estados: 'esperando' | 'nuevo' | 'yendo_tienda' | 'yendo_cliente' | 'entregado'
+  let estadoActual = 'nuevo';
+
+  const pedidoActual = {
+    id: 1043,
+    tienda: { nombre: 'Tienda El Punto', dir: 'Cra 5 #12-34', dist: '0.4 km' },
+    cliente: { nombre: 'Carlos M.', dir: 'Cra 7 #15-20', dist: '1.1 km', tel: '312 000 0000' },
+    items: [
+      { nombre: 'Leche entera 1L', cantidad: 2, precio: 3200 },
+      { nombre: 'Gaseosa 1.5L',    cantidad: 1, precio: 5000 },
+    ],
+    metodoPago: 'Efectivo',
+    ganancia: 3500,
+  };
+
+  const subtotal = pedidoActual.items.reduce((a, i) => a + i.precio * i.cantidad, 0);
+  const total    = subtotal + 2500;
+
+  function toggleDisp() {
+    disponible = !disponible;
+    const t = document.getElementById('disp-toggle');
+    const l = document.getElementById('disp-label');
+    t.classList.toggle('on', disponible);
+    l.textContent = disponible ? '● Disponible' : '● No disponible';
+    l.className   = disponible ? 'on' : 'off';
+  }
+
+  function mostrarTab(tab, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  function aceptar() { estadoActual = 'yendo_tienda'; renderActivo(); }
+  function rechazar() { estadoActual = 'esperando'; renderActivo(); }
+  function marcarRecogido() { estadoActual = 'yendo_cliente'; renderActivo(); }
+
+  function confirmarEntrega() {
+    estadoActual = 'entregado';
+    gananciaHoy += pedidoActual.ganancia;
+    pedidosHoy++;
+    document.getElementById('gan-hoy').textContent     = '$' + gananciaHoy.toLocaleString();
+    document.getElementById('gan-pedidos').textContent = pedidosHoy;
+    renderActivo();
+  }
+
+  function siguientePedido() { estadoActual = 'esperando'; renderActivo(); }
+
+  function renderActivo() {
+    const cont = document.getElementById('contenido-activo');
+
+    if (estadoActual === 'esperando') {
+      cont.innerHTML = `
+        <div style="text-align:center;padding:60px 20px;color:#9ca3af;">
+          <div style="font-size:56px;margin-bottom:16px;">🏍</div>
+          <div style="font-size:16px;font-weight:600;margin-bottom:8px;color:#374151;">Esperando pedido...</div>
+          <div style="font-size:14px;">Mantente disponible para recibir asignaciones</div>
+        </div>`;
+      return;
+    }
+
+    if (estadoActual === 'nuevo') {
+      cont.innerHTML = `
+        <div class="alerta-pedido">
+          <div class="alerta-header">
+            <span class="alerta-title">🔔 Nuevo pedido asignado</span>
+            <span class="alerta-badge">¡Nuevo!</span>
+          </div>
+          <div class="alerta-ruta">
+            <div class="ruta-paso">
+              <div class="ruta-icon tienda">🏪</div>
+              <div class="ruta-text">
+                <div class="ruta-label">Recoger en</div>
+                <div class="ruta-dir">${pedidoActual.tienda.nombre}</div>
+                <div class="ruta-dist">${pedidoActual.tienda.dir} · ${pedidoActual.tienda.dist}</div>
+              </div>
+            </div>
+            <div class="ruta-linea"></div>
+            <div class="ruta-paso">
+              <div class="ruta-icon cliente">🏠</div>
+              <div class="ruta-text">
+                <div class="ruta-label">Entregar a</div>
+                <div class="ruta-dir">${pedidoActual.cliente.nombre}</div>
+                <div class="ruta-dist">${pedidoActual.cliente.dir} · ${pedidoActual.cliente.dist}</div>
+              </div>
+            </div>
+          </div>
+          <div class="ganancia-row">
+            <span class="ganancia-lbl">Tu ganancia por este pedido</span>
+            <span class="ganancia-val">+$${pedidoActual.ganancia.toLocaleString()}</span>
+          </div>
+          <div class="alerta-btns">
+            <button class="btn-rechazar" onclick="rechazar()">Rechazar</button>
+            <button class="btn-aceptar"  onclick="aceptar()">Aceptar pedido →</button>
+          </div>
+        </div>`;
+      return;
+    }
+
+    if (estadoActual === 'entregado') {
+      cont.innerHTML = `
+        <div class="entregado-card">
+          <div class="entregado-icon">✅</div>
+          <div class="entregado-title">¡Entrega completada!</div>
+          <div class="entregado-sub">Pedido #${pedidoActual.id} entregado a ${pedidoActual.cliente.nombre}</div>
+          <div class="entregado-ganancia">+$${pedidoActual.ganancia.toLocaleString()}</div>
+          <div style="font-size:13px;color:#047857;margin-top:4px;">Total hoy: $${gananciaHoy.toLocaleString()}</div>
+          <button class="btn-siguiente" onclick="siguientePedido()">Siguiente pedido →</button>
+        </div>`;
+      return;
+    }
+
+    // EN CURSO (yendo_tienda o yendo_cliente)
+    const enCamino = estadoActual === 'yendo_cliente';
+    cont.innerHTML = `
+      <div class="card">
+        <div class="paso-actual">
+          <div class="paso-icon">${enCamino ? '🏠' : '🏪'}</div>
+          <div class="paso-title">${enCamino ? 'En camino al cliente' : 'Ve a recoger el pedido'}</div>
+          <div class="paso-sub">${enCamino ? pedidoActual.cliente.dir : pedidoActual.tienda.dir}</div>
+          <button class="btn-paso ${enCamino ? 'entregar' : 'recoger'}" onclick="${enCamino ? 'confirmarEntrega()' : 'marcarRecogido()'}">
+            ${enCamino ? '✓ Confirmar entrega' : '✓ Ya recogí el pedido'}
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cliente</div>
+        <div class="cliente-row">
+          <div class="cliente-avatar">👤</div>
+          <div>
+            <div class="cliente-name">${pedidoActual.cliente.nombre}</div>
+            <div class="cliente-dir">${pedidoActual.cliente.dir}</div>
+          </div>
+          <div class="cliente-btns">
+            <button class="btn-mini" onclick="alert('Llamando...')">📞</button>
+            <button class="btn-mini" onclick="alert('Chat próximo')">💬</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Detalle del pedido #${pedidoActual.id}</div>
+        ${pedidoActual.items.map(i => `
+          <div class="detalle-item">
+            <span>${i.nombre} ×${i.cantidad}</span>
+            <span>$${(i.precio * i.cantidad).toLocaleString()}</span>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:#6b7280;padding:7px 0;">
+          <span>Domicilio</span><span>$2.500</span>
+        </div>
+        <div class="detalle-total">
+          <span>Total a cobrar</span>
+          <span>$${total.toLocaleString()}</span>
+        </div>
+        <div style="margin-top:12px;">
+          <span class="pago-badge">💵 ${pedidoActual.metodoPago}</span>
+        </div>
+      </div>`;
+  }
+
+  function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+  }
+
+  renderActivo();
+</script>
+
+</body>
+</html>
