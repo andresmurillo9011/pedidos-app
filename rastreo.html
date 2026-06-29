@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rastreo · DomiApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #1a1a2e; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    nav {
+      background: #1a56db;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { color: #fff; font-weight: 700; font-size: 20px; }
+    .nav-link  { color: #c7d7ff; font-size: 14px; padding: 6px 14px; border-radius: 8px; }
+    .nav-link:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+    .page { max-width: 640px; margin: 0 auto; padding: 28px 16px; }
+
+    /* PASOS */
+    .steps-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e0e7ff;
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    .steps-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .steps-title { font-size: 18px; font-weight: 700; }
+    .steps-num   { font-size: 13px; color: #6b7280; margin-top: 3px; }
+    .estado-badge {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: #dbeafe;
+      color: #1a56db;
+    }
+    .estado-badge.entregado { background: #d1fae5; color: #065f46; }
+
+    .steps-track { display: flex; align-items: center; margin-bottom: 20px; }
+    .step-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #e0e7ff;
+      flex-shrink: 0;
+      transition: background .4s;
+    }
+    .step-dot.done  { background: #1a56db; }
+    .step-dot.aktiv { background: #1a56db; box-shadow: 0 0 0 4px #dbeafe; }
+    .step-line {
+      flex: 1;
+      height: 3px;
+      background: #e0e7ff;
+      transition: background .4s;
+    }
+    .step-line.done { background: #1a56db; }
+    .step-labels {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      text-align: center;
+      font-size: 11px;
+      color: #9ca3af;
+      gap: 4px;
+    }
+    .step-labels span.done  { color: #1a56db; font-weight: 600; }
+    .step-labels span.aktiv { color: #1a56db; font-weight: 700; }
+
+    /* TIEMPO */
+    .tiempo-card {
+      background: #1a56db;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tiempo-val  { font-size: 48px; font-weight: 700; line-height: 1; }
+    .tiempo-unit { font-size: 16px; opacity: .8; margin-top: 4px; }
+    .tiempo-desc { font-size: 13px; opacity: .7; margin-top: 6px; }
+    .tiempo-icon { font-size: 56px; opacity: .3; }
+
+    /* DOMICILIARIO */
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e0e7ff;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .card-title { font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: .04em; font-size: 12px; }
+    .dom-row { display: flex; align-items: center; gap: 14px; }
+    .dom-avatar {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: #dbeafe;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .dom-name { font-size: 16px; font-weight: 600; }
+    .dom-rating { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .dom-actions { margin-left: auto; display: flex; gap: 8px; }
+    .dom-btn {
+      background: #f0f4ff;
+      border: 1px solid #e0e7ff;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a56db;
+    }
+    .dom-btn:hover { background: #dbeafe; }
+
+    /* DETALLE PEDIDO */
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f4ff;
+      font-size: 14px;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-emoji { font-size: 22px; }
+    .item-name  { flex: 1; color: #374151; }
+    .item-price { font-weight: 600; color: #1a56db; }
+    .total-row  { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; border-top: 1px solid #e0e7ff; margin-top: 10px; padding-top: 10px; }
+    .total-row span:last-child { color: #1a56db; }
+
+    /* ENTREGADO */
+    .entregado-card {
+      background: #d1fae5;
+      border: 1px solid #6ee7b7;
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .entregado-icon { font-size: 52px; margin-bottom: 12px; }
+    .entregado-title { font-size: 20px; font-weight: 700; color: #065f46; margin-bottom: 6px; }
+    .entregado-sub   { font-size: 14px; color: #047857; }
+    .btn-volver {
+      display: block;
+      width: 100%;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 8px;
+      text-align: center;
+    }
+    .btn-volver:hover { background: #1e40af; }
+
+    /* CALIFICACIÓN */
+    .stars { display: flex; gap: 8px; justify-content: center; margin: 16px 0 8px; }
+    .star { font-size: 32px; cursor: pointer; filter: grayscale(1); transition: filter .2s; }
+    .star.on { filter: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">🛵 DomiApp</a>
+  <a href="index.html" class="nav-link">Volver al inicio</a>
+</nav>
+
+<div class="page" id="page"></div>
+
+<script>
+  const API = 'https://domiapp-backend.onrender.com';
+  const params = new URLSearchParams(window.location.search);
+  const pedidoId = params.get('id') || '1043';
+
+  const pasos = ['Confirmado', 'Preparando', 'En camino', 'Entregado'];
+  let pasoActual = 1;
+  let minutos = 18;
+  let calificacion = 0;
+  let intervalo;
+
+  const domiciliario = { nombre: 'Miguel Ángel R.', rating: '4.9', emoji: '🏍' };
+
+  const itemsPedido = JSON.parse(localStorage.getItem('ultimo_pedido') || 'null') || [
+    { nombre: 'Leche entera 1L', precio: 3200, emoji: '🥛', cantidad: 2 },
+    { nombre: 'Gaseosa 1.5L',   precio: 5000, emoji: '🥤', cantidad: 1 },
+  ];
+  const subtotal  = itemsPedido.reduce((a, i) => a + i.precio * i.cantidad, 0);
+  const total     = subtotal + 2500;
+
+  function avanzarPaso() {
+    if (pasoActual >= 3) { clearInterval(intervalo); render(); return; }
+    pasoActual++;
+    render();
+  }
+
+  function iniciarSimulacion() {
+    intervalo = setInterval(() => {
+      minutos = Math.max(0, minutos - 1);
+      if (minutos === 12 && pasoActual < 2) pasoActual = 2;
+      if (minutos === 0)  { pasoActual = 3; clearInterval(intervalo); }
+      render();
+    }, 3000);
+  }
+
+  function calificar(n) {
+    calificacion = n;
+    render();
+  }
+
+  function render() {
+    const page = document.getElementById('page');
+    const entregado = pasoActual === 3;
+
+    let html = '';
+
+    // PROGRESO
+    html += `
+      <div class="steps-card">
+        <div class="steps-header">
+          <div>
+            <div class="steps-title">Pedido #${pedidoId}</div>
+            <div class="steps-num">${itemsPedido.length} producto${itemsPedido.length !== 1 ? 's' : ''}</div>
+          </div>
+          <span class="estado-badge ${entregado ? 'entregado' : ''}">${pasos[pasoActual]}</span>
+        </div>
+        <div class="steps-track">
+          ${pasos.map((p, i) => `
+            <div class="step-dot ${i < pasoActual ? 'done' : ''} ${i === pasoActual ? 'aktiv' : ''}"></div>
+            ${i < pasos.length - 1 ? `<div class="step-line ${i < pasoActual ? 'done' : ''}"></div>` : ''}
+          `).join('')}
+        </div>
+        <div class="step-labels">
+          ${pasos.map((p, i) => `
+            <span class="${i < pasoActual ? 'done' : ''} ${i === pasoActual ? 'aktiv' : ''}">${p}</span>
+          `).join('')}
+        </div>
+      </div>`;
+
+    // ENTREGADO
+    if (entregado) {
+      html += `
+        <div class="entregado-card">
+          <div class="entregado-icon">✅</div>
+          <div class="entregado-title">¡Pedido entregado!</div>
+          <div class="entregado-sub">Tu pedido llegó correctamente</div>
+          <div class="stars">
+            ${[1,2,3,4,5].map(n => `
+              <span class="star ${n <= calificacion ? 'on' : ''}" onclick="calificar(${n})">⭐</span>
+            `).join('')}
+          </div>
+          ${calificacion > 0 ? `<div style="font-size:13px;color:#047857;margin-bottom:12px;">¡Gracias por tu calificación!</div>` : `<div style="font-size:13px;color:#047857;margin-bottom:12px;">¿Cómo fue tu experiencia?</div>`}
+          <a href="index.html" class="btn-volver">Volver a las tiendas</a>
+        </div>`;
+    } else {
+      // TIEMPO ESTIMADO
+      html += `
+        <div class="tiempo-card">
+          <div>
+            <div class="tiempo-val">${minutos}</div>
+            <div class="tiempo-unit">minutos</div>
+            <div class="tiempo-desc">Tiempo estimado de llegada</div>
+          </div>
+          <div class="tiempo-icon">🛵</div>
+        </div>`;
+    }
+
+    // DOMICILIARIO
+    html += `
+      <div class="card">
+        <div class="card-title">Tu domiciliario</div>
+        <div class="dom-row">
+          <div class="dom-avatar">${domiciliario.emoji}</div>
+          <div>
+            <div class="dom-name">${domiciliario.nombre}</div>
+            <div class="dom-rating">⭐ ${domiciliario.rating} · Domiciliario verificado</div>
+          </div>
+          <div class="dom-actions">
+            <button class="dom-btn" onclick="alert('Llamando a ${domiciliario.nombre}...')">📞 Llamar</button>
+            <button class="dom-btn" onclick="alert('Chat próximamente disponible')">💬 Chat</button>
+          </div>
+        </div>
+      </div>`;
+
+    // DETALLE
+    html += `
+      <div class="card">
+        <div class="card-title">Detalle del pedido</div>
+        ${itemsPedido.map(i => `
+          <div class="item-row">
+            <span class="item-emoji">${i.emoji}</span>
+            <span class="item-name">${i.nombre} ×${i.cantidad}</span>
+            <span class="item-price">$${(i.precio * i.cantidad).toLocaleString()}</span>
+          </div>
+        `).join('')}
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:#6b7280;padding:8px 0 4px;">
+          <span>Domicilio</span><span>$2.500</span>
+        </div>
+        <div class="total-row">
+          <span>Total pagado</span>
+          <span>$${total.toLocaleString()}</span>
+        </div>
+      </div>`;
+
+    page.innerHTML = html;
+  }
+
+  render();
+  iniciarSimulacion();
+</script>
+
+</body>
+</html>
