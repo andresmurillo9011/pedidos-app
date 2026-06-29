@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda · DomiApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #1a1a2e; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    nav {
+      background: #1a56db;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { color: #fff; font-weight: 700; font-size: 20px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link { color: #c7d7ff; font-size: 14px; padding: 6px 14px; border-radius: 8px; }
+    .nav-link:hover { background: rgba(255,255,255,.15); color: #fff; }
+    .nav-btn { background: #fff; color: #1a56db; border: none; border-radius: 8px; padding: 7px 16px; font-size: 14px; font-weight: 600; position: relative; }
+    .cart-badge {
+      position: absolute;
+      top: -6px; right: -6px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .store-header {
+      background: linear-gradient(135deg, #1a56db, #1e40af);
+      padding: 24px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .store-icon { font-size: 48px; }
+    .store-info h1 { font-size: 22px; font-weight: 700; }
+    .store-info p { font-size: 14px; opacity: .8; margin-top: 4px; }
+    .store-badges { display: flex; gap: 8px; margin-top: 8px; }
+    .sbadge { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,.2); }
+    .sbadge-open { background: #d1fae5; color: #065f46; }
+
+    .page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 120px; }
+
+    .sec-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin: 24px 0 12px; padding-left: 4px; border-left: 4px solid #1a56db; padding-left: 12px; }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #e0e7ff;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-emoji { font-size: 36px; margin-bottom: 8px; }
+    .product-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; flex: 1; }
+    .product-price { color: #1a56db; font-weight: 700; font-size: 16px; margin-bottom: 10px; }
+    .qty-row { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1.5px solid #c7d7ff;
+      background: #fff;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      color: #1a56db;
+      transition: all .15s;
+    }
+    .qty-btn:hover { background: #1a56db; color: #fff; border-color: #1a56db; }
+    .qty-num { font-weight: 700; font-size: 15px; min-width: 24px; text-align: center; }
+
+    /* BARRA FLOTANTE */
+    .float-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid #e0e7ff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 200;
+      transform: translateY(100%);
+      transition: transform .3s;
+    }
+    .float-bar.visible { transform: translateY(0); }
+    .float-info { font-size: 15px; color: #374151; }
+    .float-info strong { color: #1a56db; }
+    .float-btn {
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 28px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .float-btn:hover { background: #1e40af; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">🛵 DomiApp</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">← Volver</a>
+    <a href="carrito.html">
+      <button class="nav-btn">
+        🛍 Carrito
+        <span class="cart-badge" id="cart-count">0</span>
+      </button>
+    </a>
+  </div>
+</nav>
+
+<div class="store-header">
+  <div class="store-icon" id="store-icon">🏪</div>
+  <div class="store-info">
+    <h1 id="store-name">Cargando...</h1>
+    <p id="store-cat">Categoría · Distancia</p>
+    <div class="store-badges">
+      <span class="sbadge sbadge-open" id="store-estado">● Abierta</span>
+      <span class="sbadge" id="store-dist"></span>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="catalogo"></div>
+
+<div class="float-bar" id="float-bar">
+  <div class="float-info">
+    <span id="float-items">0 productos</span> ·
+    <strong id="float-total">$0</strong>
+  </div>
+  <button class="float-btn" onclick="irAlCarrito()">Ver carrito →</button>
+</div>
+
+<script>
+  const API = 'https://domiapp-backend.onrender.com';
+
+  const tiendas = [
+    { id:1, nombre:'Tienda El Punto',    categoria:'Minimercado', distancia:'0.4 km', abierta:true,  emoji:'🏪' },
+    { id:2, nombre:'La Fogata',          categoria:'Comida',      distancia:'0.8 km', abierta:true,  emoji:'🍔' },
+    { id:3, nombre:'Droguería Central',  categoria:'Farmacia',    distancia:'1.2 km', abierta:false, emoji:'💊' },
+    { id:4, nombre:'Licores El Rey',     categoria:'Licores',     distancia:'0.6 km', abierta:true,  emoji:'🍺' },
+    { id:5, nombre:'Pet Shop La Huella', categoria:'Mascotas',    distancia:'1.5 km', abierta:true,  emoji:'🐾' },
+    { id:6, nombre:'Comidas Doña Rosa',  categoria:'Comida',      distancia:'0.3 km', abierta:true,  emoji:'🫕' },
+  ];
+
+  const catalogos = {
+    1: [
+      { id:101, nombre:'Leche entera 1L',   precio:3200,  emoji:'🥛', cat:'Bebidas' },
+      { id:102, nombre:'Gaseosa 1.5L',      precio:5000,  emoji:'🥤', cat:'Bebidas' },
+      { id:103, nombre:'Agua 600ml',         precio:1500,  emoji:'💧', cat:'Bebidas' },
+      { id:104, nombre:'Pan tajado',         precio:4500,  emoji:'🍞', cat:'Panadería' },
+      { id:105, nombre:'Arroz 1kg',          precio:4000,  emoji:'🍚', cat:'Granos' },
+      { id:106, nombre:'Aceite 1L',          precio:8500,  emoji:'🫙', cat:'Granos' },
+      { id:107, nombre:'Jabón de baño',      precio:2500,  emoji:'🧼', cat:'Aseo' },
+      { id:108, nombre:'Papel higiénico x4', precio:6000,  emoji:'🧻', cat:'Aseo' },
+    ],
+    2: [
+      { id:201, nombre:'Bandeja paisa',     precio:18000, emoji:'🍛', cat:'Platos' },
+      { id:202, nombre:'Hamburguesa sencilla', precio:12000, emoji:'🍔', cat:'Platos' },
+      { id:203, nombre:'Perro caliente',    precio:8000,  emoji:'🌭', cat:'Platos' },
+      { id:204, nombre:'Jugo natural',      precio:5000,  emoji:'🥤', cat:'Bebidas' },
+      { id:205, nombre:'Gaseosa 400ml',     precio:3000,  emoji:'🥫', cat:'Bebidas' },
+    ],
+    3: [
+      { id:301, nombre:'Acetaminofén 500mg x10', precio:4500, emoji:'💊', cat:'Medicamentos' },
+      { id:302, nombre:'Alcohol antiséptico', precio:6000, emoji:'🧴', cat:'Cuidado' },
+      { id:303, nombre:'Tapabocas x5',      precio:3500,  emoji:'😷', cat:'Cuidado' },
+      { id:304, nombre:'Vitamina C x30',    precio:12000, emoji:'🍊', cat:'Vitaminas' },
+    ],
+    4: [
+      { id:401, nombre:'Cerveza 330ml',     precio:3500,  emoji:'🍺', cat:'Cervezas' },
+      { id:402, nombre:'Aguardiente 375ml', precio:22000, emoji:'🥃', cat:'Licores' },
+      { id:403, nombre:'Vino tinto 750ml',  precio:35000, emoji:'🍷', cat:'Vinos' },
+    ],
+    5: [
+      { id:501, nombre:'Concentrado perro 1kg', precio:18000, emoji:'🐕', cat:'Perros' },
+      { id:502, nombre:'Concentrado gato 500g', precio:14000, emoji:'🐈', cat:'Gatos' },
+      { id:503, nombre:'Arena para gatos 4kg',  precio:22000, emoji:'🧴', cat:'Gatos' },
+    ],
+    6: [
+      { id:601, nombre:'Sopa del día',      precio:9000,  emoji:'🍲', cat:'Menú' },
+      { id:602, nombre:'Arroz con pollo',   precio:14000, emoji:'🍗', cat:'Menú' },
+      { id:603, nombre:'Sancocho familiar', precio:28000, emoji:'🥘', cat:'Menú' },
+      { id:604, nombre:'Jugo de lulo',      precio:4000,  emoji:'🥤', cat:'Bebidas' },
+    ],
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const tiendaId = parseInt(params.get('id')) || 1;
+  const tienda = tiendas.find(t => t.id === tiendaId) || tiendas[0];
+  let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+  let cantidades = {};
+
+  // Cargar encabezado
+  document.getElementById('store-name').textContent  = tienda.nombre;
+  document.getElementById('store-cat').textContent   = tienda.categoria;
+  document.getElementById('store-icon').textContent  = tienda.emoji;
+  document.getElementById('store-dist').textContent  = tienda.distancia;
+  document.getElementById('store-estado').textContent = tienda.abierta ? '● Abierta' : '● Cerrada';
+
+  // Cargar cantidades previas del carrito
+  carrito.forEach(item => { if (item.tiendaId === tiendaId) cantidades[item.id] = item.cantidad; });
+
+  function renderCatalogo() {
+    const productos = catalogos[tiendaId] || [];
+    const categorias = [...new Set(productos.map(p => p.cat))];
+    const catalogo = document.getElementById('catalogo');
+
+    catalogo.innerHTML = categorias.map(cat => `
+      <div class="sec-title">${cat}</div>
+      <div class="products-grid">
+        ${productos.filter(p => p.cat === cat).map(p => `
+          <div class="product-card">
+            <div class="product-emoji">${p.emoji}</div>
+            <div class="product-name">${p.nombre}</div>
+            <div class="product-price">$${p.precio.toLocaleString()}</div>
+            <div class="qty-row">
+              <button class="qty-btn" onclick="cambiar(${p.id}, -1)">−</button>
+              <span class="qty-num" id="qty-${p.id}">${cantidades[p.id] || 0}</span>
+              <button class="qty-btn" onclick="cambiar(${p.id}, 1, '${p.nombre}', ${p.precio}, '${p.emoji}')">+</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  function cambiar(id, delta, nombre, precio, emoji) {
+    cantidades[id] = Math.max(0, (cantidades[id] || 0) + delta);
+    const el = document.getElementById(`qty-${id}`);
+    if (el) el.textContent = cantidades[id];
+
+    // Actualizar carrito en localStorage
+    carrito = carrito.filter(i => i.id !== id || i.tiendaId !== tiendaId);
+    if (cantidades[id] > 0) {
+      carrito.push({ id, tiendaId, nombre, precio, emoji, cantidad: cantidades[id] });
+    }
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+    actualizarBarra();
+  }
+
+  function actualizarBarra() {
+    const items = carrito.filter(i => i.tiendaId === tiendaId);
+    const totalItems = items.reduce((a, i) => a + i.cantidad, 0);
+    const totalPrecio = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
+
+    document.getElementById('cart-count').textContent = totalItems;
+    document.getElementById('float-items').textContent = `${totalItems} producto${totalItems !== 1 ? 's' : ''}`;
+    document.getElementById('float-total').textContent = `$${totalPrecio.toLocaleString()}`;
+
+    const bar = document.getElementById('float-bar');
+    if (totalItems > 0) bar.classList.add('visible');
+    else bar.classList.remove('visible');
+  }
+
+  function irAlCarrito() {
+    window.location.href = 'carrito.html';
+  }
+
+  renderCatalogo();
+  actualizarBarra();
+</script>
+
+</body>
+</html>
