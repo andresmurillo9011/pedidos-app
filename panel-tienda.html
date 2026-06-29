@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Tienda · DomiApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #1a1a2e; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    /* NAV */
+    nav {
+      background: #1a56db;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .nav-logo  { color: #fff; font-weight: 700; font-size: 18px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-name  { color: #c7d7ff; font-size: 14px; }
+    .btn-logout { background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 13px; }
+    .btn-logout:hover { background: rgba(255,255,255,.25); }
+
+    /* LAYOUT */
+    .layout { display: flex; min-height: calc(100vh - 56px); }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 220px;
+      background: #fff;
+      border-right: 1px solid #e0e7ff;
+      padding: 20px 12px;
+      flex-shrink: 0;
+    }
+    .tienda-info { padding: 12px; margin-bottom: 16px; background: #f0f4ff; border-radius: 10px; }
+    .tienda-emoji { font-size: 28px; }
+    .tienda-nombre { font-size: 14px; font-weight: 600; margin-top: 4px; }
+    .tienda-cat    { font-size: 12px; color: #6b7280; }
+    .estado-toggle { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .toggle-track {
+      width: 36px; height: 20px;
+      border-radius: 10px;
+      background: #d1d5db;
+      position: relative;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .toggle-track.on { background: #1a56db; }
+    .toggle-knob {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform .2s;
+    }
+    .toggle-track.on .toggle-knob { transform: translateX(16px); }
+    .toggle-label { font-size: 12px; font-weight: 500; }
+
+    .nav-menu { list-style: none; }
+    .nav-menu li { margin-bottom: 4px; }
+    .nav-menu a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #374151;
+      transition: all .15s;
+    }
+    .nav-menu a:hover  { background: #f0f4ff; color: #1a56db; }
+    .nav-menu a.active { background: #dbeafe; color: #1a56db; font-weight: 600; }
+    .nav-menu .icon { font-size: 18px; }
+    .badge-nav { background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; margin-left: auto; }
+
+    /* MAIN */
+    .main { flex: 1; padding: 24px; overflow-x: hidden; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; border: 1px solid #e0e7ff; padding: 16px; }
+    .stat-val  { font-size: 26px; font-weight: 700; color: #1a56db; }
+    .stat-lbl  { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+    /* PEDIDOS */
+    .pedido-card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e0e7ff;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid #e0e7ff;
+    }
+    .pedido-card.nuevo    { border-left-color: #f59e0b; }
+    .pedido-card.preparando { border-left-color: #1a56db; }
+    .pedido-card.listo    { border-left-color: #10b981; }
+    .pedido-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .pedido-id     { font-weight: 700; font-size: 15px; }
+    .pedido-badge  { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .badge-nuevo      { background: #fef3c7; color: #92400e; }
+    .badge-preparando { background: #dbeafe; color: #1e40af; }
+    .badge-listo      { background: #d1fae5; color: #065f46; }
+    .pedido-items  { font-size: 13px; color: #6b7280; margin-bottom: 10px; }
+    .pedido-footer { display: flex; justify-content: space-between; align-items: center; }
+    .pedido-cliente { font-size: 13px; color: #374151; }
+    .pedido-precio  { font-size: 14px; font-weight: 700; color: #1a56db; }
+    .pedido-btns    { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-rechazar { padding: 6px 14px; border-radius: 8px; border: 1px solid #fca5a5; background: #fff; color: #ef4444; font-size: 13px; }
+    .btn-aceptar  { padding: 6px 14px; border-radius: 8px; border: none; background: #1a56db; color: #fff; font-size: 13px; font-weight: 600; }
+    .btn-listo    { padding: 6px 14px; border-radius: 8px; border: none; background: #10b981; color: #fff; font-size: 13px; font-weight: 600; }
+
+    /* CATÁLOGO */
+    .catalogo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .btn-nuevo-prod { background: #1a56db; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 14px; font-weight: 600; }
+    .prod-tabla { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e0e7ff; }
+    .prod-tabla th { background: #f0f4ff; padding: 12px 16px; text-align: left; font-size: 13px; color: #6b7280; font-weight: 600; }
+    .prod-tabla td { padding: 12px 16px; font-size: 14px; border-top: 1px solid #f0f4ff; }
+    .prod-emoji { font-size: 22px; }
+    .prod-activo { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; margin-right: 6px; }
+    .prod-inactivo { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; margin-right: 6px; }
+    .btn-editar   { background: #f0f4ff; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #1a56db; margin-right: 4px; }
+    .btn-toggle-prod { background: #fff; border: 1px solid #e0e7ff; border-radius: 6px; padding: 5px 12px; font-size: 12px; color: #374151; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 440px;
+    }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 5px; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border-radius: 9px;
+      border: 1.5px solid #e0e7ff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+    .field input:focus, .field select:focus { border-color: #1a56db; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-cancelar { flex: 1; padding: 11px; border: 1px solid #e0e7ff; border-radius: 9px; background: #fff; color: #374151; font-size: 14px; }
+    .btn-guardar  { flex: 2; padding: 11px; border: none; border-radius: 9px; background: #1a56db; color: #fff; font-size: 14px; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">🏪 Panel Tienda</div>
+  <div class="nav-right">
+    <span class="nav-name" id="nav-nombre">Mi Tienda</span>
+    <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="tienda-info">
+      <div class="tienda-emoji">🏪</div>
+      <div class="tienda-nombre" id="sb-nombre">Tienda El Punto</div>
+      <div class="tienda-cat">Minimercado</div>
+      <div class="estado-toggle">
+        <div class="toggle-track on" id="estado-toggle" onclick="toggleEstado()">
+          <div class="toggle-knob"></div>
+        </div>
+        <span class="toggle-label" id="estado-label" style="color:#1a56db;">Abierta</span>
+      </div>
+    </div>
+
+    <ul class="nav-menu">
+      <li><a href="#" class="active" onclick="mostrar('pedidos', this)"><span class="icon">📋</span> Pedidos <span class="badge-nav" id="badge-nuevos">3</span></a></li>
+      <li><a href="#" onclick="mostrar('catalogo', this)"><span class="icon">📦</span> Catálogo</a></li>
+      <li><a href="#" onclick="mostrar('stats', this)"><span class="icon">📊</span> Estadísticas</a></li>
+      <li><a href="#" onclick="mostrar('config', this)"><span class="icon">⚙️</span> Configuración</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- PEDIDOS -->
+    <div class="section active" id="sec-pedidos">
+      <div class="section-title">Pedidos entrantes</div>
+      <div id="lista-pedidos"></div>
+    </div>
+
+    <!-- CATÁLOGO -->
+    <div class="section" id="sec-catalogo">
+      <div class="catalogo-header">
+        <div class="section-title" style="margin:0;">Catálogo de productos</div>
+        <button class="btn-nuevo-prod" onclick="abrirModal()">+ Nuevo producto</button>
+      </div>
+      <table class="prod-tabla" id="tabla-productos">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Categoría</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-productos"></tbody>
+      </table>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="section" id="sec-stats">
+      <div class="section-title">Estadísticas de hoy</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-val">$487.000</div><div class="stat-lbl">Ventas totales</div></div>
+        <div class="stat-card"><div class="stat-val">34</div><div class="stat-lbl">Pedidos entregados</div></div>
+        <div class="stat-card"><div class="stat-val">$14.320</div><div class="stat-lbl">Ticket promedio</div></div>
+        <div class="stat-card"><div class="stat-val">96%</div><div class="stat-lbl">Tasa de aceptación</div></div>
+      </div>
+      <div style="background:#fff;border-radius:12px;border:1px solid #e0e7ff;padding:20px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:14px;">Productos más vendidos</div>
+        ${['Leche entera 1L','Gaseosa 1.5L','Pan tajado','Arroz 1kg','Aceite 1L'].map((p,i)=>`
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f4ff;font-size:14px;">
+            <span>${i+1}. ${p}</span><span style="color:#1a56db;font-weight:600;">${[82,61,54,48,41][i]} und.</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="section" id="sec-config">
+      <div class="section-title">Configuración de la tienda</div>
+      <div style="background:#fff;border-radius:12px;border:1px solid #e0e7ff;padding:20px;max-width:500px;">
+        <div class="field"><label>Nombre de la tienda</label><input type="text" value="Tienda El Punto" /></div>
+        <div class="field"><label>Categoría</label>
+          <select><option>Minimercado</option><option>Comida</option><option>Farmacia</option><option>Licores</option><option>Mascotas</option></select>
+        </div>
+        <div class="field"><label>Teléfono de contacto</label><input type="tel" value="312 456 7890" /></div>
+        <div class="field"><label>Dirección</label><input type="text" value="Cra 5 #12-34" /></div>
+        <div class="field"><label>Costo de domicilio ($)</label><input type="number" value="2500" /></div>
+        <button style="background:#1a56db;color:#fff;border:none;border-radius:9px;padding:11px 24px;font-size:14px;font-weight:600;margin-top:4px;">Guardar cambios</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL PRODUCTO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Nuevo producto</div>
+    <div class="field-row">
+      <div class="field"><label>Emoji</label><input type="text" id="prod-emoji" placeholder="🥛" maxlength="2" /></div>
+      <div class="field"><label>Categoría</label><input type="text" id="prod-cat" placeholder="Bebidas" /></div>
+    </div>
+    <div class="field"><label>Nombre del producto</label><input type="text" id="prod-nombre" placeholder="Leche entera 1L" /></div>
+    <div class="field-row">
+      <div class="field"><label>Precio ($)</label><input type="number" id="prod-precio" placeholder="3200" /></div>
+      <div class="field"><label>Stock</label><input type="number" id="prod-stock" placeholder="50" /></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarProducto()">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://domiapp-backend.onrender.com';
+  const nombre = localStorage.getItem('nombre') || 'Mi Tienda';
+  document.getElementById('nav-nombre').textContent = nombre;
+  document.getElementById('sb-nombre').textContent = nombre;
+
+  // Verificar sesión
+  if (!localStorage.getItem('token')) window.location.href = 'login.html';
+
+  let tiendaAbierta = true;
+  let editandoId = null;
+
+  let pedidos = [
+    { id:1042, estado:'nuevo',      cliente:'Carlos M.', items:'2× Agua · 1× Pan · 3× Gaseosa', precio:18500, tiempo:'2 min' },
+    { id:1041, estado:'nuevo',      cliente:'Laura P.',  items:'1× Jabón · 1× Shampoo · 2× Papel', precio:32000, tiempo:'5 min' },
+    { id:1040, estado:'preparando', cliente:'Juan R.',   items:'1× Arroz · 1× Aceite · 1× Sal',  precio:22000, tiempo:'12 min' },
+    { id:1039, estado:'listo',      cliente:'Ana G.',    items:'2× Leche · 1× Yogur',             precio:15000, tiempo:'20 min' },
+  ];
+
+  let productos = [
+    { id:1, emoji:'🥛', nombre:'Leche entera 1L',   precio:3200,  cat:'Bebidas',   activo:true },
+    { id:2, emoji:'🥤', nombre:'Gaseosa 1.5L',       precio:5000,  cat:'Bebidas',   activo:true },
+    { id:3, emoji:'🍞', nombre:'Pan tajado',          precio:4500,  cat:'Panadería', activo:true },
+    { id:4, emoji:'🍚', nombre:'Arroz 1kg',           precio:4000,  cat:'Granos',    activo:true },
+    { id:5, emoji:'🧴', nombre:'Shampoo 400ml',       precio:12000, cat:'Aseo',      activo:false },
+  ];
+
+  function mostrar(sec, el) {
+    event.preventDefault();
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+    document.getElementById('sec-' + sec).classList.add('active');
+    el.classList.add('active');
+    if (sec === 'catalogo') renderProductos();
+  }
+
+  function toggleEstado() {
+    tiendaAbierta = !tiendaAbierta;
+    const t = document.getElementById('estado-toggle');
+    const l = document.getElementById('estado-label');
+    t.classList.toggle('on', tiendaAbierta);
+    l.textContent = tiendaAbierta ? 'Abierta' : 'Cerrada';
+    l.style.color = tiendaAbierta ? '#1a56db' : '#9ca3af';
+  }
+
+  function renderPedidos() {
+    const nuevos = pedidos.filter(p => p.estado === 'nuevo').length;
+    document.getElementById('badge-nuevos').textContent = nuevos;
+
+    document.getElementById('lista-pedidos').innerHTML = pedidos.map(p => `
+      <div class="pedido-card ${p.estado}" id="ped-${p.id}">
+        <div class="pedido-header">
+          <span class="pedido-id">#${p.id}</span>
+          <span class="pedido-badge badge-${p.estado}">${
+            p.estado === 'nuevo' ? '🟡 Nuevo' :
+            p.estado === 'preparando' ? '🔵 Preparando' : '🟢 Listo'
+          }</span>
+        </div>
+        <div class="pedido-items">${p.items}</div>
+        <div class="pedido-footer">
+          <span class="pedido-cliente">👤 ${p.cliente} · ⏱ hace ${p.tiempo}</span>
+          <span class="pedido-precio">$${p.precio.toLocaleString()}</span>
+        </div>
+        <div class="pedido-btns">
+          ${p.estado === 'nuevo' ? `
+            <button class="btn-rechazar" onclick="cambiarEstado(${p.id}, 'rechazado')">Rechazar</button>
+            <button class="btn-aceptar"  onclick="cambiarEstado(${p.id}, 'preparando')">Aceptar →</button>
+          ` : p.estado === 'preparando' ? `
+            <button class="btn-listo" onclick="cambiarEstado(${p.id}, 'listo')">✓ Listo para recoger</button>
+          ` : `
+            <span style="font-size:13px;color:#10b981;font-weight:500;">✅ Esperando domiciliario</span>
+          `}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function cambiarEstado(id, nuevoEstado) {
+    if (nuevoEstado === 'rechazado') {
+      pedidos = pedidos.filter(p => p.id !== id);
+    } else {
+      const p = pedidos.find(p => p.id === id);
+      if (p) p.estado = nuevoEstado;
+    }
+    renderPedidos();
+  }
+
+  function renderProductos() {
+    document.getElementById('tbody-productos').innerHTML = productos.map(p => `
+      <tr>
+        <td class="prod-emoji">${p.emoji}</td>
+        <td style="font-weight:500;">${p.nombre}</td>
+        <td>$${p.precio.toLocaleString()}</td>
+        <td>${p.cat}</td>
+        <td><span class="${p.activo ? 'prod-activo' : 'prod-inactivo'}"></span>${p.activo ? 'Activo' : 'Agotado'}</td>
+        <td>
+          <button class="btn-editar" onclick="editarProducto(${p.id})">Editar</button>
+          <button class="btn-toggle-prod" onclick="toggleProducto(${p.id})">${p.activo ? 'Desactivar' : 'Activar'}</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function toggleProducto(id) {
+    const p = productos.find(p => p.id === id);
+    if (p) p.activo = !p.activo;
+    renderProductos();
+  }
+
+  function abrirModal(id = null) {
+    editandoId = id;
+    const modal = document.getElementById('modal-overlay');
+    if (id) {
+      const p = productos.find(p => p.id === id);
+      document.getElementById('modal-title').textContent = 'Editar producto';
+      document.getElementById('prod-emoji').value  = p.emoji;
+      document.getElementById('prod-nombre').value = p.nombre;
+      document.getElementById('prod-precio').value = p.precio;
+      document.getElementById('prod-cat').value    = p.cat;
+      document.getElementById('prod-stock').value  = '';
+    } else {
+      document.getElementById('modal-title').textContent = 'Nuevo producto';
+      ['prod-emoji','prod-nombre','prod-precio','prod-cat','prod-stock'].forEach(id => document.getElementById(id).value = '');
+    }
+    modal.classList.add('open');
+  }
+
+  function editarProducto(id) { abrirModal(id); }
+
+  function cerrarModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+  function guardarProducto() {
+    const emoji  = document.getElementById('prod-emoji').value || '📦';
+    const nombre = document.getElementById('prod-nombre').value;
+    const precio = parseInt(document.getElementById('prod-precio').value) || 0;
+    const cat    = document.getElementById('prod-cat').value || 'General';
+    if (!nombre || !precio) { alert('Completa nombre y precio.'); return; }
+    if (editandoId) {
+      const p = productos.find(p => p.id === editandoId);
+      if (p) { p.emoji = emoji; p.nombre = nombre; p.precio = precio; p.cat = cat; }
+    } else {
+      productos.push({ id: Date.now(), emoji, nombre, precio, cat, activo: true });
+    }
+    cerrarModal();
+    renderProductos();
+  }
+
+  function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+  }
+
+  // Cerrar modal con click fuera
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+
+  renderPedidos();
+</script>
+
+</body>
+</html>
