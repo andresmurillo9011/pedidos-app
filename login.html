@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingresar · DomiApp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #1a1a2e; min-height: 100vh; display: flex; flex-direction: column; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    nav {
+      background: #1a56db;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo { color: #fff; font-weight: 700; font-size: 20px; }
+    .nav-link  { color: #c7d7ff; font-size: 14px; padding: 6px 14px; border-radius: 8px; }
+    .nav-link:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+    .container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .auth-card {
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #e0e7ff;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo-area { text-align: center; margin-bottom: 28px; }
+    .logo-icon { font-size: 48px; margin-bottom: 8px; }
+    .logo-name { font-size: 24px; font-weight: 700; color: #1a56db; }
+    .logo-sub  { font-size: 14px; color: #6b7280; margin-top: 4px; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      background: #f0f4ff;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      flex: 1;
+      padding: 9px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+      transition: all .2s;
+    }
+    .tab.active { background: #fff; color: #1a56db; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+
+    /* FORM */
+    .form { display: none; }
+    .form.active { display: block; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+    .field input, .field select {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e0e7ff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+      color: #1a1a2e;
+      background: #fff;
+    }
+    .field input:focus, .field select:focus { border-color: #1a56db; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .input-wrap { position: relative; }
+    .input-wrap input { padding-right: 40px; }
+    .eye-btn {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #9ca3af;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 4px;
+      transition: background .2s;
+    }
+    .btn-submit:hover { background: #1e40af; }
+    .btn-submit:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #9ca3af; font-size: 13px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e0e7ff; }
+
+    .msg { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; display: none; }
+    .msg.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+    .msg.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; display: block; }
+
+    .olvidaste { text-align: right; margin-top: -10px; margin-bottom: 16px; }
+    .olvidaste a { font-size: 13px; color: #1a56db; }
+
+    .footer-text { text-align: center; font-size: 13px; color: #6b7280; margin-top: 20px; }
+    .footer-text a { color: #1a56db; font-weight: 500; }
+
+    .rol-info { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">🛵 DomiApp</a>
+  <a href="index.html" class="nav-link">← Volver</a>
+</nav>
+
+<div class="container">
+  <div class="auth-card">
+
+    <div class="logo-area">
+      <div class="logo-icon">🛵</div>
+      <div class="logo-name">DomiApp</div>
+      <div class="logo-sub">Pedidos a domicilio rápidos y fáciles</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="cambiarTab('login', this)">Ingresar</button>
+      <button class="tab" onclick="cambiarTab('registro', this)">Registrarse</button>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- LOGIN -->
+    <form class="form active" id="form-login" onsubmit="login(event)">
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com" required />
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="login-password" placeholder="••••••••" required />
+          <button type="button" class="eye-btn" onclick="togglePass('login-password', this)">👁</button>
+        </div>
+      </div>
+      <div class="olvidaste"><a href="#">¿Olvidaste tu contraseña?</a></div>
+      <button type="submit" class="btn-submit" id="btn-login">Ingresar</button>
+    </form>
+
+    <!-- REGISTRO -->
+    <form class="form" id="form-registro" onsubmit="registro(event)">
+      <div class="field-row">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" id="reg-nombre" placeholder="Juan" required />
+        </div>
+        <div class="field">
+          <label>Apellido</label>
+          <input type="text" id="reg-apellido" placeholder="García" required />
+        </div>
+      </div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tu@correo.com" required />
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="tel" id="reg-telefono" placeholder="300 123 4567" />
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="input-wrap">
+          <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          <button type="button" class="eye-btn" onclick="togglePass('reg-password', this)">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tipo de cuenta</label>
+        <select id="reg-rol">
+          <option value="cliente">🛍 Cliente (hacer pedidos)</option>
+          <option value="tienda">🏪 Propietario de tienda</option>
+          <option value="domiciliario">🏍 Domiciliario</option>
+        </select>
+        <div class="rol-info" id="rol-info">Podrás explorar tiendas y hacer pedidos a domicilio.</div>
+      </div>
+      <button type="submit" class="btn-submit" id="btn-registro">Crear cuenta</button>
+    </form>
+
+    <div class="footer-text" id="footer-text">
+      ¿No tienes cuenta? <a href="#" onclick="cambiarTabLink('registro')">Regístrate gratis</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API = 'https://domiapp-backend.onrender.com';
+
+  const rolDescripciones = {
+    cliente:      'Podrás explorar tiendas y hacer pedidos a domicilio.',
+    tienda:       'Gestionarás tu tienda, catálogo y pedidos entrantes.',
+    domiciliario: 'Recibirás y entregarás pedidos asignados por la plataforma.',
+  };
+
+  function cambiarTab(tab, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('form-' + tab).classList.add('active');
+    document.getElementById('msg').className = 'msg';
+    document.getElementById('msg').textContent = '';
+    document.getElementById('footer-text').innerHTML = tab === 'login'
+      ? '¿No tienes cuenta? <a href="#" onclick="cambiarTabLink(\'registro\')">Regístrate gratis</a>'
+      : '¿Ya tienes cuenta? <a href="#" onclick="cambiarTabLink(\'login\')">Ingresar</a>';
+  }
+
+  function cambiarTabLink(tab) {
+    const btn = document.querySelectorAll('.tab')[tab === 'login' ? 0 : 1];
+    cambiarTab(tab, btn);
+  }
+
+  function togglePass(id, btn) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁' : '🙈';
+  }
+
+  document.getElementById('reg-rol').addEventListener('change', function() {
+    document.getElementById('rol-info').textContent = rolDescripciones[this.value] || '';
+  });
+
+  function mostrarMsg(texto, tipo) {
+    const el = document.getElementById('msg');
+    el.textContent = texto;
+    el.className = 'msg ' + tipo;
+  }
+
+  async function login(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true;
+    btn.textContent = 'Ingresando...';
+
+    const email    = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+      const res = await fetch(`${API}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token',    data.token);
+        localStorage.setItem('nombre',   data.nombre);
+        localStorage.setItem('rol',      data.rol);
+        localStorage.setItem('usuarioId', data.id);
+        redirigirPorRol(data.rol);
+      } else {
+        mostrarMsg(data.mensaje || 'Correo o contraseña incorrectos.', 'error');
+      }
+    } catch {
+      // Demo sin backend
+      localStorage.setItem('token',    'demo-token');
+      localStorage.setItem('nombre',   email.split('@')[0]);
+      localStorage.setItem('rol',      'cliente');
+      mostrarMsg('Modo demo: ingresando sin backend...', 'success');
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+
+  async function registro(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-registro');
+    btn.disabled = true;
+    btn.textContent = 'Creando cuenta...';
+
+    const nombre   = document.getElementById('reg-nombre').value;
+    const apellido = document.getElementById('reg-apellido').value;
+    const email    = document.getElementById('reg-email').value;
+    const telefono = document.getElementById('reg-telefono').value;
+    const password = document.getElementById('reg-password').value;
+    const rol      = document.getElementById('reg-rol').value;
+
+    try {
+      const res = await fetch(`${API}/api/auth/registro`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: `${nombre} ${apellido}`, email, telefono, password, rol })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token',    data.token);
+        localStorage.setItem('nombre',   data.nombre);
+        localStorage.setItem('rol',      data.rol);
+        localStorage.setItem('usuarioId', data.id);
+        mostrarMsg('¡Cuenta creada! Redirigiendo...', 'success');
+        setTimeout(() => redirigirPorRol(data.rol), 1200);
+      } else {
+        mostrarMsg(data.mensaje || 'Error al crear la cuenta.', 'error');
+      }
+    } catch {
+      // Demo sin backend
+      localStorage.setItem('token',    'demo-token');
+      localStorage.setItem('nombre',   nombre);
+      localStorage.setItem('rol',      rol);
+      mostrarMsg('Modo demo: cuenta creada sin backend.', 'success');
+      setTimeout(() => redirigirPorRol(rol), 1200);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Crear cuenta';
+  }
+
+  function redirigirPorRol(rol) {
+    if (rol === 'tienda')       window.location.href = 'panel-tienda.html';
+    else if (rol === 'domiciliario') window.location.href = 'panel-domiciliario.html';
+    else                        window.location.href = 'index.html';
+  }
+
+  // Si ya está logueado redirigir
+  if (localStorage.getItem('token')) {
+    const rol = localStorage.getItem('rol');
+    if (rol) redirigirPorRol(rol);
+  }
+</script>
+
+</body>
+</html>
